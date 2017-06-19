@@ -10,5 +10,5 @@ You can find the program with `HTTPComponents` instead of `curl` on the other br
 
 ## How to build a jar
 1. `mvn clean package`
-2. Look for .jar in `target` folder.
+2. Look for the .jar in `target` folder.
 
