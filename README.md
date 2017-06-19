@@ -1,6 +1,6 @@
 # Trilex Delay Instapush Notifier
 
-This is a program which scrapes the web for delays of your train and informs you via Instapush. It uses a HTTPComponents.
+This is a program which scrapes the web for delays of your train and informs you via Instapush. It uses `HTTPComponents`.
 
 ## How to use
 You have to add a class `Secrets` with all the necessary information.
