@@ -2,10 +2,16 @@
  * @author NWuensche
  */
 
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.BasicHttpEntity;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -37,45 +43,24 @@ public class TrilexWebScrapper {
         return d.format(DateTimeFormatter.ofPattern("dd.MM.yy")).replace("-",".");
     }
 
+    private static void sendInstapushMessage(String whichDay) {
+        CloseableHttpClient httpclient = HttpClients.createDefault();
+        HttpPost httpPost = new HttpPost("https://api.instapush.im/v1/post");
 
-    public static void sendInstapushMessage(String whichDay) {
-        ProcessBuilder pb = new ProcessBuilder("bash", createTempScript(whichDay).toString());
+        httpPost.addHeader("x-instapush-appid", Secrets.appID);
+        httpPost.addHeader("x-instapush-appsecret", Secrets.appSecret);
+        httpPost.addHeader("Content-Type", "application/json");
+
+        String content = "{\"event\":\"Trilex\",\"trackers\":{\"dayOfWeek\":\"" + whichDay + " \"}}";
+        BasicHttpEntity b = new BasicHttpEntity();
+        b.setContent(new ByteArrayInputStream(content.getBytes(StandardCharsets.UTF_8)));
+        httpPost.setEntity(b);
+
         try {
-            Process p1 = pb.start();
-            p1.waitFor();
-        } catch (IOException | InterruptedException e) {
-            e.printStackTrace();
-        }
-    }
-
-
-    /**
-     * @return Script which can be executed
-     */
-    public static File createTempScript(String whichDay) {
-        String cmd = "curl -X POST  -H \"x-instapush-appid: " + Secrets.appID + "\" -H \"x-instapush-appsecret: " + Secrets.appSecret + "\" -H \"Content-Type: application/json\" -d '{\"event\":\"Trilex\",\"trackers\":{\"dayOfWeek\":\"" + whichDay +  "\"}}' https://api.instapush.im/v1/post";
-
-        File tempScript = null;
-        try {
-            tempScript = File.createTempFile("script", null);
+            CloseableHttpResponse res1 = httpclient.execute(httpPost);
         } catch (IOException e) {
             e.printStackTrace();
         }
-
-        Writer streamWriter = null;
-        try {
-            streamWriter = new OutputStreamWriter(new FileOutputStream(
-                    tempScript));
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
-        PrintWriter printWriter = new PrintWriter(streamWriter);
-
-        printWriter.println("#!/bin/bash");
-        printWriter.println(cmd);
-
-        printWriter.close();
-
-        return tempScript;
     }
+
 }
