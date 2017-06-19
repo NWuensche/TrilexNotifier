@@ -1,0 +1,7 @@
+testSelenium.iml
+phantomjsdriver.log
+target
+out
+.idea
+src/main/java/META-INF
+src/main/java/Secrets.java
