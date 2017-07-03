@@ -3,5 +3,6 @@ phantomjsdriver.log
 target
 out
 .idea
+*.iml
 src/main/java/META-INF
 src/main/java/Secrets.java

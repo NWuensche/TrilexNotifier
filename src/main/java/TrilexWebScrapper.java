@@ -39,22 +39,15 @@ public class TrilexWebScrapper {
 
 
     public static void sendInstapushMessage(String whichDay) {
-        ProcessBuilder pb = new ProcessBuilder("bash", createTempScript(whichDay).toString());
-        try {
-            Process p1 = pb.start();
-            p1.waitFor();
-        } catch (IOException | InterruptedException e) {
-            e.printStackTrace();
-        }
+        executeScript(
+               "curl -X POST  -H \"x-instapush-appid: " + Secrets.appID + "\" -H \"x-instapush-appsecret: " + Secrets.appSecret + "\" -H \"Content-Type: application/json\" -d '{\"event\":\"Trilex\",\"trackers\":{\"dayOfWeek\":\"" + whichDay +  "\"}}' https://api.instapush.im/v1/post"
+        );
     }
 
-
     /**
-     * @return Script which can be executed
+     * @param commands one command = one String
      */
-    public static File createTempScript(String whichDay) {
-        String cmd = "curl -X POST  -H \"x-instapush-appid: " + Secrets.appID + "\" -H \"x-instapush-appsecret: " + Secrets.appSecret + "\" -H \"Content-Type: application/json\" -d '{\"event\":\"Trilex\",\"trackers\":{\"dayOfWeek\":\"" + whichDay +  "\"}}' https://api.instapush.im/v1/post";
-
+    public static void executeScript(String... commands) {
         File tempScript = null;
         try {
             tempScript = File.createTempFile("script", null);
@@ -72,10 +65,17 @@ public class TrilexWebScrapper {
         PrintWriter printWriter = new PrintWriter(streamWriter);
 
         printWriter.println("#!/bin/bash");
-        printWriter.println(cmd);
+        for(String command : commands) {
+            printWriter.println(command);
+        }
 
         printWriter.close();
-
-        return tempScript;
+        ProcessBuilder pb = new ProcessBuilder("bash", tempScript.toString());
+        try {
+            Process p1 = pb.start();
+            p1.waitFor();
+        } catch (IOException | InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 }
